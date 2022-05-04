@@ -3,7 +3,8 @@ package whosthatpokemon;
 import java.util.Random;
 
 /**
- *
+ * Clase que crea arrays aleatorios de nombres de pokemon
+ * 
  * @author Gabriel González
  * @author Anxo Vilas
  */

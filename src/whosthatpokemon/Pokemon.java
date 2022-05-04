@@ -1,8 +1,10 @@
 package whosthatpokemon;
 
 /**
- *
- * @author a21gabrielgb
+ * Enumerado de los pokemon
+ * 
+ * @author Gabriel González
+ * @author Anxo Vilas
  */
 public enum Pokemon {
 
