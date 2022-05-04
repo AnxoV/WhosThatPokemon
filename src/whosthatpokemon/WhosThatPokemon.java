@@ -7,7 +7,10 @@ package whosthatpokemon;
 public class WhosThatPokemon {
 
     public static void main(String[] args) {
-        
-        System.out.println(Pokemon.pickRandomPokemon());
+
+        Deck d1 = new Deck((byte)6);
+        for (String pokemon : d1.getDeck()) {
+            System.out.println(pokemon);
+        }
     }
 }
