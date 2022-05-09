@@ -50,7 +50,11 @@ public class Board {
         if (!isClearedLine((byte) 4) || isAllCleared()) {
             return false;
         }
-        matchPokemon(pokemon);
+        if (matchPokemon(pokemon)) {
+            multiplier++;
+        } else {
+            multiplier = 1;
+        }
         return true;
     }
 
@@ -85,16 +89,13 @@ public class Board {
             if (!isClearedLine((byte) i)) {
                 for (int j = 0; j < board[i].length; j++) {
                     if (board[i][j] != pokemon.charAt(j)) {
-                        multiplier = 1;
                         return false;
                     }
                 }
                 cleanRow((byte) i);
-                multiplier++;
                 return true;
             }
         }
-        multiplier = 1;
         return false;
     }
 
