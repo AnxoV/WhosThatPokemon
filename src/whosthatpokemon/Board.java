@@ -1,7 +1,5 @@
 package whosthatpokemon;
 
-import java.util.Scanner;
-
 /**
  * Clase que crea el tablero del juego
  *
@@ -13,8 +11,10 @@ public class Board {
     private char[][] board;
     private char[][] mirrorBoard;
     private Deck deck;
-    private byte numberPokemon = 0;
     private int score = 0;
+    private final int[] scores = {100, 50, 25, 10};
+    private byte multiplier = 1;
+    private byte numberPokemon = 0;
 
     /**
      * Constructor de Board
@@ -26,28 +26,25 @@ public class Board {
         this.deck = deck;
     }
 
+    public int getScore() {
+        return score;
+    }
+
     /**
-     * Inicia las rondas del juego
+     * Juega las rondas
      *
      * @return <ul>
      * <li>true: sigues jugando</li>
      * <li>false: se acabó el juego</li>
      * </ul>
      */
-    public boolean startRound() {
+    public boolean play(String pokemon) {
         goDown();
         insertPokemon();
         if (!isClearedLine((byte) 4) || isAllCleared()) {
             return false;
         }
-        do {
-            for (char[] board1 : board) {
-                for (int j = 0; j < board1.length; j++) {
-                    System.out.print(board1[j]);
-                }
-                System.out.println("");
-            }
-        } while (matchPokemon(guessPokemon()) && !isAllCleared());
+        matchPokemon(pokemon);
         return true;
     }
 
@@ -77,39 +74,28 @@ public class Board {
      * <li>false: no coinciden</li>
      * </ul>
      */
-    public boolean matchPokemon(String pokemon) {
+    private boolean matchPokemon(String pokemon) {
         for (int i = board.length - 1; i >= 0; i--) {
             if (!isClearedLine((byte) i)) {
                 for (int j = 0; j < board[i].length; j++) {
                     if (board[i][j] != pokemon.charAt(j)) {
+                        multiplier = 0;
                         return false;
                     }
                 }
                 cleanRow((byte) i);
+                multiplier++;
                 return true;
             }
         }
+        multiplier = 0;
         return false;
-    }
-
-    /**
-     * Recoge el nombre introducido por el jugador
-     *
-     * @return nombre introducido
-     */
-    public String guessPokemon() {
-        Scanner teclado = new Scanner(System.in);
-        String pokemon;
-        do {
-            pokemon = teclado.nextLine();
-        } while (pokemon.length() != deck.getLength());
-        return pokemon;
     }
 
     /**
      * Baja todos los nombres una posición
      */
-    public void goDown() {
+    private void goDown() {
         for (int i = board.length - 1; i >= 0; i--) {
             for (int j = board[i].length - 1; j >= 0; j--) {
                 if (i > 0) {
@@ -122,20 +108,21 @@ public class Board {
     }
 
     /**
-     * Borra el pokemon de una linea
+     * Borra el pokemon de una linea y añade su puntuación
      *
      * @param row linea a limpiar
      */
-    public void cleanRow(byte row) {
+    private void cleanRow(byte row) {
         for (int i = 0; i < board[row].length; i++) {
             board[row][i] = '\u0000';
         }
+        score += scores[row] * multiplier;
     }
 
     /**
      * Mete un pokemon en la primera linea del tablero
      */
-    public void insertPokemon() {
+    private void insertPokemon() {
         String pokemon = deck.getDeck()[numberPokemon];
         if (isClearedLine((byte) 0) || numberPokemon < 20) {
             for (int i = 0; i < board[0].length; i++) {
