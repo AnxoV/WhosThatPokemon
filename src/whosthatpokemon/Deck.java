@@ -4,24 +4,22 @@ import java.util.Random;
 
 /**
  * Clase que crea arrays aleatorios de nombres de pokemon
- * 
+ *
  * @author Gabriel González
  * @author Anxo Vilas
  */
 public class Deck {
 
     private String[] deck = new String[20];
-
-    public String[] getDeck() {
-        return deck;
-    }
+    private byte length;
 
     /**
      * Constructor de deck
-     * 
+     *
      * @param length cantidad de letras de los nombres de los pokemon
      */
     public Deck(byte length) {
+        this.length = length;
         for (int i = 0; i < deck.length; i++) {
             Pokemon x;
             do {
@@ -29,6 +27,14 @@ public class Deck {
             } while (x.getNumL() != length || isRepeated(x.getName()));
             deck[i] = x.getName();
         }
+    }
+
+    public String[] getDeck() {
+        return deck;
+    }
+
+    public byte getLength() {
+        return length;
     }
 
     /**
