@@ -85,6 +85,9 @@ public class Board {
      * </ul>
      */
     private boolean matchPokemon(String pokemon) {
+        if (pokemon.length() < deck.getLength()) {
+            return false;
+        }
         for (int i = board.length - 1; i >= 0; i--) {
             if (!isClearedLine((byte) i)) {
                 for (int j = 0; j < board[i].length; j++) {
