@@ -161,5 +161,21 @@ public class Board {
         }
         return true;
     }
-
+    
+    @Override
+    public String toString() {
+        String string = "";
+        for (char[] row : board) {
+            for (char c : row) {
+                if (c == '\u0000') {
+                    string += "_ ";
+                } else {
+                    string += c + " ";
+                }
+            }
+            string += "\n";
+        }
+        return string;
+    }
+    
 }
