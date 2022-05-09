@@ -30,6 +30,10 @@ public class Board {
         return score;
     }
 
+    public char[][] getBoard() {
+        return board;
+    }
+
     /**
      * Juega las rondas
      *
