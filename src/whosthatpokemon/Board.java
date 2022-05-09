@@ -24,6 +24,7 @@ public class Board {
     public Board(Deck deck) {
         board = new char[5][deck.getLength()];
         this.deck = deck;
+        insertPokemon();
     }
 
     public int getScore() {
@@ -37,16 +38,13 @@ public class Board {
     /**
      * Juega las rondas
      *
+     * @param pokemon nombre a comprobar
      * @return <ul>
      * <li>true: sigues jugando</li>
      * <li>false: se acabó el juego</li>
      * </ul>
      */
     public boolean play(String pokemon) {
-        if (multiplier == 1 || isAllCleared()) {
-            goDown();
-            insertPokemon();
-        }
         if (!isClearedLine((byte) 4) || isAllCleared()) {
             return false;
         }
@@ -54,6 +52,10 @@ public class Board {
             multiplier++;
         } else {
             multiplier = 1;
+        }
+        if (multiplier == 1 || isAllCleared()) {
+            goDown();
+            insertPokemon();
         }
         return true;
     }
@@ -95,6 +97,7 @@ public class Board {
                         return false;
                     }
                 }
+                score += scores[i] * multiplier;
                 cleanRow((byte) i);
                 return true;
             }
@@ -126,7 +129,6 @@ public class Board {
         for (int i = 0; i < board[row].length; i++) {
             board[row][i] = '\u0000';
         }
-        score += scores[row] * multiplier;
     }
 
     /**
