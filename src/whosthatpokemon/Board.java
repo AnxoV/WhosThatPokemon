@@ -43,8 +43,10 @@ public class Board {
      * </ul>
      */
     public boolean play(String pokemon) {
-        goDown();
-        insertPokemon();
+        if (multiplier == 1 || isAllCleared()) {
+            goDown();
+            insertPokemon();
+        }
         if (!isClearedLine((byte) 4) || isAllCleared()) {
             return false;
         }
@@ -83,7 +85,7 @@ public class Board {
             if (!isClearedLine((byte) i)) {
                 for (int j = 0; j < board[i].length; j++) {
                     if (board[i][j] != pokemon.charAt(j)) {
-                        multiplier = 0;
+                        multiplier = 1;
                         return false;
                     }
                 }
@@ -92,7 +94,7 @@ public class Board {
                 return true;
             }
         }
-        multiplier = 0;
+        multiplier = 1;
         return false;
     }
 
