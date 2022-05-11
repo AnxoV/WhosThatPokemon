@@ -1,15 +1,21 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package whosthatpokemon;
 
 import java.awt.Component;
+import java.awt.GridBagLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.DimensionUIResource;
 
 /**
  *
- * @author Gabriel González
- * @author Anxo Vilas
+ * @author a21anxovm
  */
 public class Gui {
     
@@ -17,14 +23,13 @@ public class Gui {
     private char [] input;
     private int cursor;
     
-    private JFrame rootFrame;
-    private JPanel gamePanel;
-    private JLabel boardLabel;
-    private JLabel inputLabel;
+    private Frame rootFrame;
+    private JLabel imageLabel;
+    private Panel gamePanel;
+    private Label boardLabel;
+    private Label inputLabel;
     
     private KeyboardListener listener = new KeyboardListener();
-    
-    
     
     public Gui(Board board) {
         this.board = board;
@@ -39,26 +44,27 @@ public class Gui {
     }
     
     private void initRoot() {
-        rootFrame = new JFrame("Who's That Pokemon");
-        BoxLayout layout = new BoxLayout(rootFrame.getContentPane(), BoxLayout.PAGE_AXIS);
-        rootFrame.setLayout(layout);
-        rootFrame.setLocationRelativeTo(null);
-        rootFrame.setResizable(true);
-        rootFrame.setVisible(true);
-        rootFrame.setSize(500, 500);
+        rootFrame = new Frame("Who's That Pokemon");
+        ImageIcon imageIcon = new ImageIcon("src\\whosthatpokemon\\background.png");
+        imageLabel = new JLabel(imageIcon);
+        DimensionUIResource dimension = new DimensionUIResource(imageIcon.getIconWidth(), imageIcon.getIconHeight());
+        imageLabel.setSize(dimension);
+        rootFrame.setContentPane(imageLabel);
+        GridBagLayout layout = new GridBagLayout();
+        imageLabel.setLayout(layout);
+        rootFrame.setResizable(false);
+        rootFrame.pack();
     }
     
     private void initGame() {
-        gamePanel = new JPanel();
-        BoxLayout layout = new BoxLayout(gamePanel, BoxLayout.Y_AXIS);
-        gamePanel.setLayout(layout);
+        gamePanel = new Panel();
         EmptyBorder border = new EmptyBorder(40, 40, 40, 40);
         gamePanel.setBorder(border);
-        rootFrame.add(gamePanel);
+        imageLabel.add(gamePanel);
     }
     
     private void initBoard() {
-        boardLabel = new JLabel("<html>"
+        boardLabel = new Label("<html>"
                                     + "<pre>"
                                         + board.toString()
                                     + "</pre>"
@@ -68,7 +74,7 @@ public class Gui {
     }
     
     private void initInput() {
-        inputLabel = new JLabel("<html>"
+        inputLabel = new Label("<html>"
                                     + "<pre>"
                                         + getInputString()
                                     + "</pre>"
@@ -165,5 +171,41 @@ public class Gui {
             }
             update();
         }
+    }
+
+private class Frame extends JFrame {
+
+        public Frame(String title) {
+            setTitle(title);
+            GridBagLayout layout = new GridBagLayout();
+            setLayout(layout);
+            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            //setLocationRelativeTo(null);
+            setVisible(true);
+        }
+
+    }
+
+    private class Panel extends JPanel {
+
+        public Panel() {
+            BoxLayout layout = new BoxLayout(this, BoxLayout.PAGE_AXIS);
+            setLayout(layout);
+        }
+
+    }
+
+    private class Label extends JLabel {
+
+        public Label(String text) {
+            setText(text);
+            /*Bor layout = new GridBagLayout();
+            setLayout(layout);*/
+        }
+
+        public Label() {
+            new Label("");
+        }
+
     }
 }

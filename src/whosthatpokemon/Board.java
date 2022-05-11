@@ -13,6 +13,7 @@ public class Board {
 
     private char[][] board;
     private char[][] mirrorBoard;
+    private String baseMirror = "";
     private Deck deck;
     private int score = 0;
     private final int[] scores = {100, 50, 25, 10};
@@ -25,9 +26,13 @@ public class Board {
      * @param deck conjunto de pokemons aleatorios que se usarán
      */
     public Board(Deck deck) {
-        board = new char[5][deck.getLength()];
-        mirrorBoard = new char[5][deck.getLength()];
+        int length = deck.getLength();
+        board = new char[5][length];
+        mirrorBoard = new char[5][length];
         this.deck = deck;
+        for (int i = 0; i < length; i++) {
+            baseMirror += "_";
+        }
         insertPokemon();
     }
 
@@ -114,6 +119,7 @@ public class Board {
      */
     private void goDown() {
         for (int i = board.length - 1; i >= 0; i--) {
+            
             for (int j = board[i].length - 1; j >= 0; j--) {
                 if (i > 0) {
                     board[i][j] = board[i - 1][j];
@@ -121,6 +127,18 @@ public class Board {
                     cleanRow((byte) i);
                 }
             }
+            if (i > 0) {
+                System.out.println(board.length-i-1);
+                String pokemon = String.valueOf(board[board.length-i-1]);
+                System.out.println(pokemon);
+                String mirrorPokemon = String.valueOf(mirrorBoard[board.length-i-1]);
+                System.out.println(mirrorPokemon);
+                mirrorBoard[i-board.length+1] = getMirror(pokemon, mirrorPokemon).toCharArray();
+            } else {
+                cleanRow((byte) i);
+            }
+            
+            
         }
     }
 
@@ -132,6 +150,7 @@ public class Board {
     private void cleanRow(byte row) {
         for (int i = 0; i < board[row].length; i++) {
             board[row][i] = '\u0000';
+            mirrorBoard[row][i] = '\u0000';
         }
     }
 
@@ -140,9 +159,11 @@ public class Board {
      */
     private void insertPokemon() {
         String pokemon = deck.getDeck()[numberPokemon];
+        String mirrorPokemon = getMirror(pokemon, baseMirror);
         if (isClearedLine((byte) 0) || numberPokemon < 20) {
             for (int i = 0; i < board[0].length; i++) {
                 board[0][i] = pokemon.charAt(i);
+                mirrorBoard[0][1] = mirrorPokemon.charAt(i);
             }
             numberPokemon++;
         }
@@ -152,14 +173,14 @@ public class Board {
      * Devuelve las partes de un String, completandolo cada vez más.
      *
      * @param pokemon String a fragmentar
-     * @param fragmented String desfragmentado
+     * @param mirrorPokemon String desfragmentado
      * @return String fragmentado
      */
-    private String fragmented(String pokemon, String fragmented) {
+    private String getMirror(String pokemon, String mirrorPokemon) {
         Random rand = new Random();
         ArrayList<Integer> availablePositions = new ArrayList();
-        for (int i = 0; i < fragmented.length(); i++) {
-            char c = fragmented.charAt(i);
+        for (int i = 0; i < mirrorPokemon.length(); i++) {
+            char c = mirrorPokemon.charAt(i);
             if (c == '_') {
                 availablePositions.add(i);
             }
@@ -167,11 +188,10 @@ public class Board {
         int randomIndex = rand.nextInt(availablePositions.size());
         int randomAvailable = availablePositions.get(randomIndex);
 
-        char[] fragmentedChars = fragmented.toCharArray();
+        char[] fragmentedChars = mirrorPokemon.toCharArray();
         fragmentedChars[randomAvailable] = pokemon.charAt(randomAvailable);
-        fragmented = String.valueOf(fragmentedChars);
-
-        return fragmented;
+        mirrorPokemon = String.valueOf(fragmentedChars);
+        return mirrorPokemon;
     }
 
     /**
@@ -195,7 +215,7 @@ public class Board {
     @Override
     public String toString() {
         String string = "";
-        for (char[] row : board) {
+        for (char[] row : mirrorBoard) {
             for (char c : row) {
                 if (c == '\u0000') {
                     string += "_ ";
