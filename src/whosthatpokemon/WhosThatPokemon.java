@@ -1,7 +1,5 @@
 package whosthatpokemon;
 
-import java.util.Scanner;
-
 /**
  * Clase para probar el resto de clases
  *
