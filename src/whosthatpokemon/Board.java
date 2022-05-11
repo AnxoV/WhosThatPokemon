@@ -1,5 +1,8 @@
 package whosthatpokemon;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 /**
  * Clase que crea el tablero del juego
  *
@@ -23,6 +26,7 @@ public class Board {
      */
     public Board(Deck deck) {
         board = new char[5][deck.getLength()];
+        mirrorBoard = new char[5][deck.getLength()];
         this.deck = deck;
         insertPokemon();
     }
@@ -145,6 +149,32 @@ public class Board {
     }
 
     /**
+     * Devuelve las partes de un String, completandolo cada vez más.
+     *
+     * @param pokemon String a fragmentar
+     * @param fragmented String desfragmentado
+     * @return String fragmentado
+     */
+    private String fragmented(String pokemon, String fragmented) {
+        Random rand = new Random();
+        ArrayList<Integer> availablePositions = new ArrayList();
+        for (int i = 0; i < fragmented.length(); i++) {
+            char c = fragmented.charAt(i);
+            if (c == '_') {
+                availablePositions.add(i);
+            }
+        }
+        int randomIndex = rand.nextInt(availablePositions.size());
+        int randomAvailable = availablePositions.get(randomIndex);
+
+        char[] fragmentedChars = fragmented.toCharArray();
+        fragmentedChars[randomAvailable] = pokemon.charAt(randomAvailable);
+        fragmented = String.valueOf(fragmentedChars);
+
+        return fragmented;
+    }
+
+    /**
      * Comprueba si la linea está vacia
      *
      * @param line linea a comprobar
@@ -161,7 +191,7 @@ public class Board {
         }
         return true;
     }
-    
+
     @Override
     public String toString() {
         String string = "";
@@ -177,5 +207,5 @@ public class Board {
         }
         return string;
     }
-    
+
 }
