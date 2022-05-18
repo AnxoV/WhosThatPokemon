@@ -54,14 +54,15 @@ public class Gui {
 
     private void initRoot() {
         rootFrame = new Frame("Who's That Pokemon");
+        rootFrame.setBackground(Color.WHITE);
         ImageIcon imageIcon = new ImageIcon("src\\whosthatpokemon\\background.png");
         imageLabel = new JLabel(imageIcon);
         DimensionUIResource dimension = new DimensionUIResource(imageIcon.getIconWidth(), imageIcon.getIconHeight());
         imageLabel.setSize(dimension);
         rootFrame.setContentPane(imageLabel);
-        //BoxLayout layout = new BoxLayout(rootFrame.getContentPane(), BoxLayout.PAGE_AXIS);
         imageLabel.setLayout(new FlowLayout());
-        rootFrame.setResizable(false);
+        EmptyBorder border = new EmptyBorder(10, 10, 10, 10);
+        imageLabel.setBorder(border);
         rootFrame.pack();
     }
     
@@ -260,7 +261,9 @@ public class Gui {
             GridBagLayout layout = new GridBagLayout();
             setLayout(layout);
             setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            //setLocationRelativeTo(null);
+            setLocationRelativeTo(null);
+            //setUndecorated(true);
+            setResizable(false);
             setVisible(true);
         }
 
