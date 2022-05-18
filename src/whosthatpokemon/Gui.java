@@ -23,14 +23,15 @@ import javax.swing.plaf.DimensionUIResource;
 public class Gui {
     
     Board board;
-    private char [] input;
-    private int cursor;
+    private Input pokemonInput;
     
     private boolean started = false;
+    private Input nameInput;
     
     private Frame rootFrame;
     private JLabel imageLabel;
     private Panel startPanel;
+    private Label nameLabel;
     private Panel gamePanel;
     private Label scoreLabel;
     private Label boardLabel;
@@ -47,16 +48,10 @@ public class Gui {
     
     public Gui(Board board) {
         this.board = board;
-        input = new char[board.getDeck().getLength()];
+        pokemonInput = new Input(board.getDeck().getLength());
+        nameInput = new Input(3);
     }
-    
-    public char[] getInput() {
-        return input;
-    }
-    public void setInput(char [] input) {
-        this.input = input;
-    }
-    
+
     private void initRoot() {
         rootFrame = new Frame("Who's That Pokemon");
         ImageIcon imageIcon = new ImageIcon("src\\whosthatpokemon\\background.png");
@@ -80,13 +75,17 @@ public class Gui {
     
     private void initStart() {
         startPanel = new Panel();
+        EmptyBorder border = new EmptyBorder(120, 40, 40, 40);
+        startPanel.setBorder(border);
+        startPanel.setOpaque(false);
         rootFrame.add(startPanel);
         
         Label titleLabel = new Label("Introduce tu nombre");
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         startPanel.add(titleLabel);
         
-        Label nameLabel = new Label("_ _ _");
+        nameLabel = new Label(nameInput.toStylishedString());
+        nameLabel.setSize(nameLabel.getPreferredSize());
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         startPanel.add(nameLabel);
     }
@@ -110,7 +109,7 @@ public class Gui {
     private void initInput() {
         inputLabel = new Label("<html>"
                                     + "<pre>"
-                                        + getInputString()
+                                        + pokemonInput.toStylishedString()
                                     + "</pre>"
                                 + "</html>");
         inputLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -180,17 +179,6 @@ public class Gui {
         gameOverFrame.pack();
     }
     
-    private String getInputString() {
-        String string = "";
-        for (char c : input) {
-            if (c == '\u0000') {
-               string += "_ ";
-            } else {
-                string += c + " ";
-            }
-        }
-        return string;
-    }
     
     private void updateScore() {
         scoreLabel.setText("Score: " + board.getScore());
@@ -202,41 +190,28 @@ public class Gui {
                             + "</pre>"
                         + "</html>");
     }
-    private void updateInput() {
+    private void updatePokemonInput() {
         inputLabel.setText("<html>"
                             + "<pre>"
-                                + getInputString()
+                                + pokemonInput.toStylishedString()
                             + "</pre>"
                         + "</html>");
+        inputLabel.setMaximumSize(inputLabel.getMinimumSize());
+    }
+    private void updateNameInput() {
+        nameLabel.setText("<html>"
+                            + "<pre>"
+                                + nameInput.toStylishedString()
+                            + "</pre>"
+                        + "</html>");
+        nameLabel.setMaximumSize(nameLabel.getMinimumSize());
     }
     private void update() {
         updateScore();
         updateBoard();
-        updateInput();
+        updatePokemonInput();
     }
     
-    private void addChar(char c) {
-        if (cursor < input.length) {
-            input[cursor] = c;
-            cursor++;
-        } else {
-            input[cursor-1] = c;
-        }
-    }
-    private void delChar() {
-        if (cursor > 0) {
-            input[cursor-1] = '\u0000';
-            cursor--;
-        } else {
-            input[0] = '\u0000';
-        }
-    }
-    private void clearInput() {
-        for (int i = 0; i < input.length; i++) {
-            input[i] = '\u0000';
-        }
-        cursor = 0;
-    }
     
     private class KeyboardListener extends KeyAdapter {
         private final static int ENTER = 10;
@@ -245,32 +220,40 @@ public class Gui {
         @Override
         public void keyPressed(KeyEvent e) {
             int keyCode = e.getKeyCode();
-            if ((keyCode >= 65 && keyCode <= 90) || (keyCode >= 97 && keyCode <= 122)) {
-                addChar(e.getKeyChar());
-            } else if (keyCode == DEL) {
-                delChar();
-            } else if (keyCode == ENTER) {
-                if (!started) {
+            char character = Character.toUpperCase(e.getKeyChar());
+            if (started) {
+                if ((keyCode >= 65 && keyCode <= 90) || (keyCode >= 97 && keyCode <= 122)) {
+                    pokemonInput.addChar(character);
+                } else if (keyCode == DEL) {
+                    pokemonInput.delChar();
+                } else if (keyCode == ENTER) {
+                    String pokemon = pokemonInput.toString();
+                    if (!board.play(pokemon)) {
+                        gameOver();
+                    }
+                    pokemonInput.clear();
+                }
+                update();
+            }
+            if (!started) {
+                if ((keyCode >= 65 && keyCode <= 90) || (keyCode >= 97 && keyCode <= 122)) {
+                    nameInput.addChar(character);
+                } else if (keyCode == DEL) {
+                    nameInput.delChar();
+                } else if (keyCode == ENTER) {
                     initGame();
                     initScore();
                     initBoard();
                     initInput();
-                    startPanel.setOpaque(true);
+                    startPanel.setVisible(false);
                     started = true;
-                } else {
-                    String inputPokemon = new String(input);
-                    if (!board.play(inputPokemon)) {
-                        gameOver();
-                    }
-                    clearInput();
                 }
-                
+                updateNameInput();
             }
-            update();
         }
     }
 
-private class Frame extends JFrame {
+    private class Frame extends JFrame {
 
         public Frame(String title) {
             setTitle(title);

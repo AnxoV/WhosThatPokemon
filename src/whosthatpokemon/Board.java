@@ -148,7 +148,7 @@ public class Board {
      * Mete un pokemon en la primera linea del tablero
      */
     private void insertPokemon() {
-        String pokemon = deck.getDeck()[numberPokemon];
+        String pokemon = deck.getDeck()[numberPokemon].toUpperCase();
         String mirrorPokemon = getMirror(pokemon, defaultMirror);
         if (isClearedLine((byte) 0)) {
             board[0] = pokemon;
