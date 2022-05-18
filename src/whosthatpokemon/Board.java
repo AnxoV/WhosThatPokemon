@@ -11,14 +11,15 @@ import java.util.Random;
  */
 public class Board {
 
-    private char[][] board;
-    private char[][] mirrorBoard;
-    private String baseMirror = "";
+    private String[] board;
+    private String[] mirrorBoard;
+    private String defaultMirror = "";
     private Deck deck;
     private int score = 0;
-    private final int[] scores = {100, 50, 25, 10};
+    private final int[] boardScores = {100, 50, 25, 10, 5};
     private byte multiplier = 1;
     private byte numberPokemon = 0;
+    private int cursor = 0;
 
     /**
      * Constructor de Board
@@ -27,11 +28,11 @@ public class Board {
      */
     public Board(Deck deck) {
         int length = deck.getLength();
-        board = new char[5][length];
-        mirrorBoard = new char[5][length];
+        board = new String[5];
+        mirrorBoard = new String[5];
         this.deck = deck;
         for (int i = 0; i < length; i++) {
-            baseMirror += "_";
+            defaultMirror += "_";
         }
         insertPokemon();
     }
@@ -40,8 +41,16 @@ public class Board {
         return score;
     }
 
-    public char[][] getBoard() {
+    public String[] getBoard() {
         return board;
+    }
+    
+    public Deck getDeck() {
+        return deck;
+    }
+    
+    public int getCursor() {
+        return  cursor;
     }
 
     /**
@@ -54,9 +63,6 @@ public class Board {
      * </ul>
      */
     public boolean play(String pokemon) {
-        if (!isClearedLine((byte) 4) || isAllCleared()) {
-            return false;
-        }
         if (matchPokemon(pokemon)) {
             multiplier++;
         } else {
@@ -64,7 +70,12 @@ public class Board {
         }
         if (multiplier == 1 || isAllCleared()) {
             goDown();
-            insertPokemon();
+            if (numberPokemon < 20) {
+                insertPokemon();
+            }
+        }
+        if (cursor == 5 || isAllCleared()) {
+            return false;
         }
         return true;
     }
@@ -99,17 +110,11 @@ public class Board {
         if (pokemon.length() < deck.getLength()) {
             return false;
         }
-        for (int i = board.length - 1; i >= 0; i--) {
-            if (!isClearedLine((byte) i)) {
-                for (int j = 0; j < board[i].length; j++) {
-                    if (board[i][j] != pokemon.charAt(j)) {
-                        return false;
-                    }
-                }
-                score += scores[i] * multiplier;
-                cleanRow((byte) i);
-                return true;
-            }
+        if (pokemon.equals(board[cursor])) {
+            cleanRow((byte) cursor);
+            score += boardScores[cursor] * multiplier;
+            cursor--;
+            return true;
         }
         return false;
     }
@@ -119,27 +124,14 @@ public class Board {
      */
     private void goDown() {
         for (int i = board.length - 1; i >= 0; i--) {
-            
-            for (int j = board[i].length - 1; j >= 0; j--) {
-                if (i > 0) {
-                    board[i][j] = board[i - 1][j];
-                } else {
-                    cleanRow((byte) i);
-                }
-            }
             if (i > 0) {
-                System.out.println(board.length-i-1);
-                String pokemon = String.valueOf(board[board.length-i-1]);
-                System.out.println(pokemon);
-                String mirrorPokemon = String.valueOf(mirrorBoard[board.length-i-1]);
-                System.out.println(mirrorPokemon);
-                mirrorBoard[i-board.length+1] = getMirror(pokemon, mirrorPokemon).toCharArray();
+                board[i] = board[i - 1];
+                mirrorBoard[i] = getMirror(board[i - 1], mirrorBoard[i - 1]);
             } else {
                 cleanRow((byte) i);
             }
-            
-            
         }
+        cursor++;
     }
 
     /**
@@ -148,10 +140,8 @@ public class Board {
      * @param row linea a limpiar
      */
     private void cleanRow(byte row) {
-        for (int i = 0; i < board[row].length; i++) {
-            board[row][i] = '\u0000';
-            mirrorBoard[row][i] = '\u0000';
-        }
+        board[row] = "";
+        mirrorBoard[row] = "";
     }
 
     /**
@@ -159,12 +149,10 @@ public class Board {
      */
     private void insertPokemon() {
         String pokemon = deck.getDeck()[numberPokemon];
-        String mirrorPokemon = getMirror(pokemon, baseMirror);
-        if (isClearedLine((byte) 0) || numberPokemon < 20) {
-            for (int i = 0; i < board[0].length; i++) {
-                board[0][i] = pokemon.charAt(i);
-                mirrorBoard[0][1] = mirrorPokemon.charAt(i);
-            }
+        String mirrorPokemon = getMirror(pokemon, defaultMirror);
+        if (isClearedLine((byte) 0)) {
+            board[0] = pokemon;
+            mirrorBoard[0] = mirrorPokemon;
             numberPokemon++;
         }
     }
@@ -177,6 +165,10 @@ public class Board {
      * @return String fragmentado
      */
     private String getMirror(String pokemon, String mirrorPokemon) {
+        if (pokemon == null || mirrorPokemon == null
+                || pokemon.equals("") || mirrorPokemon.equals("")) {
+            return defaultMirror;
+        }
         Random rand = new Random();
         ArrayList<Integer> availablePositions = new ArrayList();
         for (int i = 0; i < mirrorPokemon.length(); i++) {
@@ -204,28 +196,24 @@ public class Board {
      * </ul>
      */
     private boolean isClearedLine(byte line) {
-        for (int i = 0; i < board[line].length; i++) {
-            if (board[line][i] != '\u0000') {
-                return false;
-            }
+        if (board[line] == null || board[line] == "") {
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override
     public String toString() {
         String string = "";
-        for (char[] row : mirrorBoard) {
-            for (char c : row) {
-                if (c == '\u0000') {
-                    string += "_ ";
-                } else {
-                    string += c + " ";
-                }
+        for (String pokemon : mirrorBoard) {
+            if (pokemon == null || pokemon == "") {
+                pokemon = defaultMirror;
+            }
+            for (char c : pokemon.toCharArray()) {
+                string += c + " ";
             }
             string += "\n";
         }
         return string;
     }
-
 }

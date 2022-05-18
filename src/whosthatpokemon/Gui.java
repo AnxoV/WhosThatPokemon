@@ -5,7 +5,10 @@
  */
 package whosthatpokemon;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -23,17 +26,28 @@ public class Gui {
     private char [] input;
     private int cursor;
     
+    private boolean started = false;
+    
     private Frame rootFrame;
     private JLabel imageLabel;
+    private Panel startPanel;
     private Panel gamePanel;
+    private Label scoreLabel;
     private Label boardLabel;
     private Label inputLabel;
+    
+    private Frame gameOverFrame;
+    private Panel goInfoPanel;
+    private Label goTitleLabel;
+    private Label goScoreLabel;
+    private Label goBestScoreLabel;
+    private Label goFailedLabel;
     
     private KeyboardListener listener = new KeyboardListener();
     
     public Gui(Board board) {
         this.board = board;
-        input = new char[board.getBoard()[0].length];
+        input = new char[board.getDeck().getLength()];
     }
     
     public char[] getInput() {
@@ -50,17 +64,37 @@ public class Gui {
         DimensionUIResource dimension = new DimensionUIResource(imageIcon.getIconWidth(), imageIcon.getIconHeight());
         imageLabel.setSize(dimension);
         rootFrame.setContentPane(imageLabel);
-        GridBagLayout layout = new GridBagLayout();
-        imageLabel.setLayout(layout);
+        //BoxLayout layout = new BoxLayout(rootFrame.getContentPane(), BoxLayout.PAGE_AXIS);
+        imageLabel.setLayout(new FlowLayout());
         rootFrame.setResizable(false);
         rootFrame.pack();
     }
     
     private void initGame() {
         gamePanel = new Panel();
-        EmptyBorder border = new EmptyBorder(40, 40, 40, 40);
+        EmptyBorder border = new EmptyBorder(90, 40, 40, 40);
         gamePanel.setBorder(border);
-        imageLabel.add(gamePanel);
+        gamePanel.setOpaque(false);
+        rootFrame.add(gamePanel, Component.CENTER_ALIGNMENT);
+    }
+    
+    private void initStart() {
+        startPanel = new Panel();
+        rootFrame.add(startPanel);
+        
+        Label titleLabel = new Label("Introduce tu nombre");
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        startPanel.add(titleLabel);
+        
+        Label nameLabel = new Label("_ _ _");
+        nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        startPanel.add(nameLabel);
+    }
+    
+    private void initScore() {
+        scoreLabel = new Label("Score: " + board.getScore());
+        scoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        gamePanel.add(scoreLabel);
     }
     
     private void initBoard() {
@@ -87,13 +121,63 @@ public class Gui {
         rootFrame.addKeyListener(listener);
         rootFrame.setFocusable(true);
     }
-
+    
     public void run() {
         initRoot();
-        initGame();
-        initBoard();
-        initInput();
+        initStart();
         initListeners();
+    }
+    
+    
+    private void initGameOver() {
+        gameOverFrame = new Frame("Game Over");
+        gameOverFrame.setResizable(false);
+    }
+    
+    private void initGOTitle() {
+        goTitleLabel = new Label("Game Over");
+        goTitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        goInfoPanel.add(goTitleLabel);
+    }
+    
+    private void initGOInfo() {
+        goInfoPanel = new Panel();
+        EmptyBorder border = new EmptyBorder(40, 40, 40, 40);
+        goInfoPanel.setBorder(border);
+        goInfoPanel.setOpaque(false);
+        gameOverFrame.add(goInfoPanel);
+    }
+    
+    private void initGOScore() {
+        goScoreLabel = new Label("Score: " + board.getScore());
+        goScoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        goInfoPanel.add(goScoreLabel);
+    }
+    
+    private void initGOBestScore() {
+        goBestScoreLabel = new Label("Mejor puntuación: UwU");
+        goBestScoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        goInfoPanel.add(goBestScoreLabel);
+    }
+    
+    private void initGOFailed() {
+        String lastPokemon = board.getBoard()[board.getCursor()-1];
+        if (lastPokemon.equals("") || lastPokemon == null) {
+            lastPokemon = "nada";
+        }
+        goFailedLabel = new Label("Fallaste: " + lastPokemon);
+        goFailedLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        goInfoPanel.add(goFailedLabel);
+    }
+    
+    private void gameOver() {
+        initGameOver();
+        initGOInfo();
+        initGOTitle();
+        initGOScore();
+        initGOBestScore();
+        initGOFailed();
+        gameOverFrame.pack();
     }
     
     private String getInputString() {
@@ -108,6 +192,9 @@ public class Gui {
         return string;
     }
     
+    private void updateScore() {
+        scoreLabel.setText("Score: " + board.getScore());
+    }
     private void updateBoard() {
         boardLabel.setText("<html>"
                             + "<pre>"
@@ -123,6 +210,7 @@ public class Gui {
                         + "</html>");
     }
     private void update() {
+        updateScore();
         updateBoard();
         updateInput();
     }
@@ -162,12 +250,21 @@ public class Gui {
             } else if (keyCode == DEL) {
                 delChar();
             } else if (keyCode == ENTER) {
-                String inputPokemon = new String(input);
-                if (!board.play(inputPokemon)) {
-                    System.out.println("Game Over");
+                if (!started) {
+                    initGame();
+                    initScore();
+                    initBoard();
+                    initInput();
+                    startPanel.setOpaque(true);
+                    started = true;
+                } else {
+                    String inputPokemon = new String(input);
+                    if (!board.play(inputPokemon)) {
+                        gameOver();
+                    }
+                    clearInput();
                 }
-                System.out.println("Score: " + board.getScore());
-                clearInput();
+                
             }
             update();
         }
@@ -199,8 +296,8 @@ private class Frame extends JFrame {
 
         public Label(String text) {
             setText(text);
-            /*Bor layout = new GridBagLayout();
-            setLayout(layout);*/
+            GridBagLayout layout = new GridBagLayout();
+            setLayout(layout);
         }
 
         public Label() {
